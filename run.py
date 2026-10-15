@@ -1,20 +1,17 @@
 from cpu import CPU
-from components.alu import ALU
-from programs.assembler import Assembler
-from components.memory import Memory
-import components.program_counter as Pc
-import components.register_file as register_file
-import global_defs as utils
 
 bit_len = 8
 num_reg = 16
 cells = 256
+display_width = 16
+display_height = 16
 
-cpu = CPU(bit_len, num_reg, ALU(bit_len), Pc, utils, register_file, Memory(bit_len, cells), Assembler(bit_len))
+cpu = CPU(bit_len, num_reg, 0xFF, display_width, display_height)
 
 version = "beta 0.1"
 
 print("Running: EthanOS, ver. " + version)
+print("Current Resoltion: " + str(display_width) + "x" + str(display_height))
 
 commands = ["exit", "run"]
 

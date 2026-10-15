@@ -1,32 +1,37 @@
 import components.memory as Memory
-import programs.assembler as Assembler
+from programs.assembler import Assembler
+import global_defs as utils
+import components.program_counter as Pc
+import components.register_file as RegFile
+from components.alu import ALU
+
 # CPU class
 
 class CPU():
 
-    def __init__(self, bit_len, num_reg, alu, pc, utils, reg_file, memory: Memory, assmebler: Assembler):
+    def __init__(self, bit_len, num_reg, mem_cells, display_width, display_height):
         
         # Initialize bit information and registers
         
         self.bit_len = bit_len
         self.field_len = bit_len // 2
         self.num_registers = num_reg
-        self.memory = memory
+        self.memory = Memory
+        self.memory.init(bit_len, mem_cells, display_width, display_height)
 
         # Initialize all components
 
-        self.pc = pc
+        self.pc = Pc
         self.utils = utils
-        self.alu = alu
-        self.reg_file = reg_file
-        self.reg_file.get_info(self.num_registers, bit_len)
-
+        self.alu = ALU(bit_len)
+        self.reg_file = RegFile
+        self.reg_file.init(self.num_registers, bit_len)
         # Initialize all program-related information
 
         self.cycles = 0
         self.flags = {}
         self.program = []
-        self.assembler = assmebler
+        self.assembler = Assembler(bit_len)
 
         # Initialize all opcodes from binary
 
@@ -110,6 +115,7 @@ class CPU():
             case "LD":
                 mem_val = self.memory.read(src)
                 self.reg_file.operate("LDI", dest, mem_val)
+                print("Read: " + self.utils.display_bin(mem_val))
             case "LDI": 
                 result = self.reg_file.operate("LDI", dest, src)
             case "CMP":

@@ -3,7 +3,7 @@ import global_defs as utils
 bit_len: int
 registers = []
 
-def get_info(num_registers, bit_len):
+def init(num_registers, bit_len):
     global registers
     bit_len = bit_len
 

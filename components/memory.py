@@ -1,15 +1,33 @@
 import global_defs as utils
 
-class Memory():
-    def __init__(self, bit_len, cells):
-        self.bit_len = bit_len
-        self.cells = [[False]*bit_len for i in range(cells)]
+bit_len: int
+num_cells: int
+cells = []
 
-    def read(self, cell):
-        value = self.cells[utils.bits_to_int(cell)]
-        print(value)
-        return value
+display_width: int
+display_height: int
 
-    def write(self, cell, value):
-        self.cells[utils.bits_to_int(cell)] = value
+def init(bit_length, mem_cells, dis_w, dis_h):
+    global num_cells, display_height, display_width
+
+    bit_len = bit_length
+    num_cells = mem_cells
+    cells = [[False]*bit_len for i in range(mem_cells)]
+
+    # Display setup
+    display_width = dis_w
+    display_height = dis_h
+
+    display_bytes = (display_width * display_height) // bit_len
+    resolution = display_width * display_height
+    
+
+def read(cell):
+    value = cells[utils.bits_to_int(cell)]
+    return value
+
+def write(cell, value):
+    cells[utils.bits_to_int(cell)] = value
+
+
         
