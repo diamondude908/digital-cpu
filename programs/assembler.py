@@ -27,6 +27,10 @@ class Assembler():
             "HLT": "1111"
         }
 
+        self.psuedos = [
+            "JZ",
+            "JNZ"
+        ]
 
     # Reads the .txt file given by the CPU and 
     # turns it into a list of strings
@@ -52,8 +56,10 @@ class Assembler():
 
         if oc in self.opcodes:
             parts[0] = self.opcodes[oc]
+        elif oc in self.psuedos:
+            self.assemble_psuedo(parts)
         else:
-            print(oc + " is not a valid opcode.")
+            print(oc + " is not a valid instruction")
 
         new_line = "".join(parts)
 
@@ -61,8 +67,26 @@ class Assembler():
         
         return new_line
 
-    def assemble_psuedo(tokens):
+    def assemble_psuedo(self, tokens):
         oc = tokens[0]
+        dest = tokens[1]
+        src1 = None
+        src2 = None
+
+        if len(tokens) > 2:
+            src1 = tokens[2]
+            src2 = tokens[3]
+
+        result = []
+
+        if oc in self.psuedos:
+            match oc:
+                case "JZ":
+                    print("JZ")
+                    inst = "JUMP 0010" + dest
+                    result.append(inst)
+        print(result)
+        return result
 
     # Formats each line in the entire program
 
@@ -74,5 +98,9 @@ class Assembler():
         return formatted
 
 
+assembler = Assembler(8)
+inst = "JZ 0001"
+
+assembler.assemble_psuedo(inst)
 
 

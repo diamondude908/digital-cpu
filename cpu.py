@@ -1,15 +1,17 @@
-
+import components.memory as Memory
+import programs.assembler as Assembler
 # CPU class
 
 class CPU():
 
-    def __init__(self, bit_len, num_reg, alu, pc, utils, reg_file, assmebler):
+    def __init__(self, bit_len, num_reg, alu, pc, utils, reg_file, memory: Memory, assmebler: Assembler):
         
         # Initialize bit information and registers
         
         self.bit_len = bit_len
         self.field_len = bit_len // 2
         self.num_registers = num_reg
+        self.memory = memory
 
         # Initialize all components
 
@@ -38,7 +40,7 @@ class CPU():
             "0110": "SHL",
             "0111": "SHR",
             "1000": "MOV",
-            "1001": "LOD",
+            "1001": "LD",
             "1010": "LDI",
             "1100": "STR",
             "1101": "JMP",
@@ -56,7 +58,7 @@ class CPU():
         unassembled = assemble.read_file(program)
         self.program = assemble.format_program(unassembled)
         self.pc.prog_len = len(self.program)
-            
+        
     # This assembles an instuction from a 16 bit double instruction
     # to four parts that are returned to the step function.
     # For example, "0001011000111010" becomes ["ADD", "0110", "0011", "1010"]
@@ -79,17 +81,20 @@ class CPU():
     # This matches each of the arguements including the opcode, dest,
     # and sources to their proper instuction and runs the related component.
 
+
     def execute_instruction(self, opcode, dest, src1, src2):
         self.cycles += 1
         result = None
         flags = None
+
         reg_a = self.reg_file.read(src1)
         reg_b = self.reg_file.read(src2)
 
         src = self.utils.binary(src1 + src2)
+        mem_dest = self.utils.binary(dest + src1)
 
         # This is only used in the JMP case
-        int_dest = self.reg_file.bits_to_int(src1)
+        int_dest = self.utils.bits_to_int(src1)
 
         match opcode:
             case "NOP":
@@ -102,8 +107,9 @@ class CPU():
                 result, flags = self.alu.operate("SHR", dest, src, None)
             case "MOV": 
                 "1000"
-            case "LD": 
-                "1001"
+            case "LD":
+                mem_val = self.memory.read(src)
+                self.reg_file.operate("LDI", dest, mem_val)
             case "LDI": 
                 result = self.reg_file.operate("LDI", dest, src)
             case "CMP":
@@ -112,7 +118,7 @@ class CPU():
                 # zero register and uses the other two positions as normal
                 _, flags = self.alu.operate("COMP", src2, dest, src1)
             case "STR": 
-                "1100"
+                self.memory.write(mem_dest, reg_b)
             case "JMP": 
                 cond = int(dest, 2)
                 conditions = {
@@ -158,7 +164,6 @@ class CPU():
         else:
             print("Program finished in " + str(self.cycles) + " cycles!")
             
-
 
 
 

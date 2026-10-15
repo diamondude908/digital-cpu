@@ -9,3 +9,9 @@ def display_bin(bits):
     if bits is None:
         return ""
     return "".join("1" if bit else "0" for bit in bits)
+
+def bits_to_int(bits) -> int:
+    value = 0
+    for bit in bits:
+        value = (value << 1) | int(bit)
+    return value

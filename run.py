@@ -1,15 +1,16 @@
 from cpu import CPU
 from components.alu import ALU
 from programs.assembler import Assembler
+from components.memory import Memory
 import components.program_counter as Pc
 import components.register_file as register_file
-import global_defs
+import global_defs as utils
 
 bit_len = 8
 num_reg = 16
+cells = 256
 
-cpu = CPU(bit_len, num_reg, ALU(bit_len), Pc, global_defs, register_file, Assembler(bit_len))
-
+cpu = CPU(bit_len, num_reg, ALU(bit_len), Pc, utils, register_file, Memory(bit_len, cells), Assembler(bit_len))
 
 version = "beta 0.1"
 
