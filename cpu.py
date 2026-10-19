@@ -4,6 +4,7 @@ import global_defs as utils
 import components.program_counter as Pc
 import components.register_file as RegFile
 from components.alu import ALU
+import components.display as display
 
 # CPU class
 
@@ -26,6 +27,8 @@ class CPU():
         self.alu = ALU(bit_len)
         self.reg_file = RegFile
         self.reg_file.init(self.num_registers, bit_len)
+        self.display = display
+        self.display.init()
         # Initialize all program-related information
 
         self.cycles = 0

@@ -20,6 +20,9 @@ def run_program(program):
     cpu.assemble_program(prog)
     cpu.run()
 
+
+cpu.display.draw_pixel(0, 0, 1)
+
 while True:
     user_input = input(">>> ").lower()
     parts = user_input.split()
