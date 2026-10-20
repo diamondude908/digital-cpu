@@ -5,6 +5,7 @@ import components.program_counter as Pc
 import components.register_file as RegFile
 from components.alu import ALU
 import components.display as display
+import programs.isa as isa
 
 # CPU class
 
@@ -27,34 +28,18 @@ class CPU():
         self.alu = ALU(bit_len)
         self.reg_file = RegFile
         self.reg_file.init(self.num_registers, bit_len)
-        self.display = display
-        self.display.init()
+        #self.display = display
+        #self.display.init()
         # Initialize all program-related information
 
         self.cycles = 0
         self.flags = {}
         self.program = []
-        self.assembler = Assembler(bit_len)
+        self.assembler = Assembler(bit_len, num_reg)
 
         # Initialize all opcodes from binary
 
-        self.bin_to_op = {
-            "0000": "NOP",
-            "0001": "ADD",
-            "0010": "SUB",
-            "0011": "AND",
-            "0100": "OR",
-            "0101": "XOR",
-            "0110": "SHL",
-            "0111": "SHR",
-            "1000": "MOV",
-            "1001": "LD",
-            "1010": "LDI",
-            "1100": "STR",
-            "1101": "JMP",
-            "1110": "HLT",
-            "1111": "CMP"
-        }
+        self.bin_opcodes = isa.bin_opcodes
 
         
 
@@ -76,8 +61,8 @@ class CPU():
         parts = [inst[i * size:(i + 1) * size] for i in range(4)]
 
         oc = parts[0]
-        if oc in self.bin_to_op:
-            parts[0] = self.bin_to_op[oc]
+        if oc in self.bin_opcodes:
+            parts[0] = self.bin_opcodes[oc]
 
         opcode = parts[0]
         dest = parts[1]
@@ -109,16 +94,14 @@ class CPU():
                 pass
             case "ADD" | "SUB" | "AND" | "OR" | "XOR": 
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
-            case "SHL": 
-                result, flags = self.alu.operate("SHL", dest, src, None)
-            case "SHR": 
-                result, flags = self.alu.operate("SHR", dest, src, None)
+            case "SFT": 
+                result, flags = self.alu.operate("SFT", dest, src1, src2)
             case "MOV": 
                 "1000"
             case "LD":
                 mem_val = self.memory.read(src)
                 self.reg_file.operate("LDI", dest, mem_val)
-                print("Read: " + self.utils.display_bin(mem_val))
+                print("Loaded: " + self.utils.display_bin(mem_val))
             case "LDI": 
                 result = self.reg_file.operate("LDI", dest, src)
             case "CMP":
@@ -143,7 +126,7 @@ class CPU():
                 "1110"
             
             case _:
-                SyntaxError(opcode + " is not a real opcode.")
+                raise SyntaxError(opcode + " is not a real opcode.")
 
         if flags is not None:
             self.flags = flags

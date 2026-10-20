@@ -61,6 +61,18 @@ class ALU:
         sub, cout = self.add(a, self.get_inverse(b), True)
         return sub, cout
 
+    def shift(self, mode, a):
+        result = []
+        carry = False
+
+        match mode:
+            case "0001":
+                result, carry = self.shift_left(a)
+            case "0010":
+                result = self.shift_right(a)
+
+        return result, carry
+    
     def shift_left(self, a):
         result, carry = self.add(a, a, False)
         return result, carry
@@ -85,14 +97,11 @@ class ALU:
         return None, flags
 
 
-    operations = ["ADD", "SUB", "OR", "AND", "XOR", "NOT", "SHL", "SHR", "CMP"]
-
     def operate(self, operation, dest, src1, src2):
         result = []
         carry = False
 
-        if operation in self.operations:
-            match operation:
+        match operation:
                 case "ADD":
                     result, carry = self.add(src1, src2, False)
                 case "SUB":
@@ -103,25 +112,24 @@ class ALU:
                     result = self.bitwise_op(src1, src2, self.AND)
                 case "XOR":
                     result = self.bitwise_op(src1, src2, self.XOR)
-                case "SHL":
-                    result = self.shift_left(src1)
-                case "SHR":
-                    result = self.shift_right(src1)
+                case "SFT":
+                    result, carry = self.shift(src1, src2)
                 case "CMP":
                     _, flags = self.compare(src1, src2)
+                case "NOT":
+                    result = self.NOT(dest, src1)
                 case _:
-                    SyntaxError(operation + " is not a valid ALU operation.")
+                    raise SyntaxError(operation + " is not a valid ALU operation.")
 
-            self.reg_file.write(dest, result)
+        self.reg_file.write(dest, result)
 
-            flags = {
-                "Z": not any(result),
-                "C": carry
-            }
+        flags = {
+            "Z": not any(result),
+            "C": carry
+        }
             
-            return result, flags
-        else:    
-            print("Error: Not a valid operation")
+        return result, flags
+
 
 
 

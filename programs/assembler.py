@@ -1,36 +1,22 @@
+import programs.isa as isa
+import global_defs as utils
 
 class Assembler():
 
-    def __init__(self, bit_len):
+    def __init__(self, bit_len, num_reg):
         self.bit_len = bit_len
         self.inst_len = bit_len * 2
+        self.num_reg = num_reg
         self.program = []
 
-        # List of all opcodes and their binary equivalents
+        self.registers = {}
+        for i in range(num_reg):
+            self.registers["r" + str(i)] = format(i, "04b")
 
-        self.opcodes = {
-            "NOP": "0000",
-            "ADD": "0001",
-            "SUB": "0010",
-            "AND": "0011",
-            "OR": "0100",
-            "XOR": "0101",
-            "SHL": "0110",
-            "SHR": "0111",
-            "MOV": "1000",
-            "LD": "1001",
-            "LDI": "1010",
-            "CMP": "1011",
-            "STR": "1100",
-            "JMP": "1101",
-            "JZ": "1110",
-            "HLT": "1111"
-        }
+        # Initialize the ISA lists
 
-        self.psuedos = [
-            "JZ",
-            "JNZ"
-        ]
+        self.opcodes = isa.opcodes
+        self.psuedos = isa.pseudos
 
     # Reads the .txt file given by the CPU and 
     # turns it into a list of strings
@@ -52,41 +38,35 @@ class Assembler():
     def format_line(self, line: str):
         parts = line.split()
 
-        oc = parts[0]
+        # Format the opcode into binary
 
-        if oc in self.opcodes:
-            parts[0] = self.opcodes[oc]
-        elif oc in self.psuedos:
-            self.assemble_psuedo(parts)
-        else:
-            print(oc + " is not a valid instruction")
+        oc = parts[0]
+        if oc not in self.opcodes:
+            raise SyntaxError(oc + " is not a valid instruction")
+        parts[0] = self.opcodes[oc]
+
+        # Format registers and hex into binary
+
+        for i in range(1, len(parts)):
+
+            if parts[i] in self.registers:
+                parts[i] = self.registers[parts[i]]
+
+            elif parts[i].startswith("0x"):
+                value = int(parts[i], 16)
+                if value > 255:
+                    raise SyntaxError(value + " is not valid 8 bit number.")
+                parts[i] = format(value, "08b")
+
+        # Puts everything together
 
         new_line = "".join(parts)
-
         new_line = new_line.ljust(self.inst_len, "0")
-        
+
         return new_line
 
     def assemble_psuedo(self, tokens):
-        oc = tokens[0]
-        dest = tokens[1]
-        src1 = None
-        src2 = None
-
-        if len(tokens) > 2:
-            src1 = tokens[2]
-            src2 = tokens[3]
-
-        result = []
-
-        if oc in self.psuedos:
-            match oc:
-                case "JZ":
-                    print("JZ")
-                    inst = "JUMP 0010" + dest
-                    result.append(inst)
-        print(result)
-        return result
+        pass
 
     # Formats each line in the entire program
 
@@ -94,13 +74,8 @@ class Assembler():
         formatted = []
         for line in prog:
             formatted.append(self.format_line(line))
-
+        print(formatted)
         return formatted
 
-
-assembler = Assembler(8)
-inst = "JZ 0001"
-
-assembler.assemble_psuedo(inst)
 
 

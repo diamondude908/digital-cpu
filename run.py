@@ -6,9 +6,9 @@ cells = 256
 display_width = 16
 display_height = 16
 
-cpu = CPU(bit_len, num_reg, 0xFF, display_width, display_height)
+cpu = CPU(bit_len, num_reg, cells, display_width, display_height)
 
-version = "beta 0.1"
+version = "beta 1.1"
 
 print("Running: EthanOS, ver. " + version)
 print("Current Resoltion: " + str(display_width) + "x" + str(display_height))
@@ -21,7 +21,7 @@ def run_program(program):
     cpu.run()
 
 
-cpu.display.draw_pixel(0, 0, 1)
+#cpu.display.draw_pixel(0, 0, 1)
 
 while True:
     user_input = input(">>> ").lower()
