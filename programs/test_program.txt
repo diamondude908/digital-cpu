@@ -5,8 +5,10 @@ LDI r3 0x01
 
 ADD r8 r8 r2
 SUB r1 r1 r3
-JMP 0010 0010
+JZ 0010
 
-SFT 0001 r8
+SHL r8 r8
+ADD r8 r8 r0
+
 
 

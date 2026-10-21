@@ -100,6 +100,7 @@ class ALU:
     def operate(self, operation, dest, src1, src2):
         result = []
         carry = False
+        write_address = dest
 
         match operation:
                 case "ADD":
@@ -113,7 +114,8 @@ class ALU:
                 case "XOR":
                     result = self.bitwise_op(src1, src2, self.XOR)
                 case "SFT":
-                    result, carry = self.shift(src1, src2)
+                    result, carry = self.shift(dest, src2)
+                    write_address = src1
                 case "CMP":
                     _, flags = self.compare(src1, src2)
                 case "NOT":
@@ -121,7 +123,7 @@ class ALU:
                 case _:
                     raise SyntaxError(operation + " is not a valid ALU operation.")
 
-        self.reg_file.write(dest, result)
+        self.reg_file.write(write_address, result)
 
         flags = {
             "Z": not any(result),

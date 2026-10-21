@@ -43,6 +43,8 @@ pseudos = {
     "JNZ": [["JMP", "0011", "dest"]],
     "JC": [["JMP", "0100", "dest"]],
     "JNC": [["JMP", "0101", "dest"]],
+    "SHL": [["SFT", "0001", "dest", "src1"]],
+    "SHR": [["SFT", "0010", "dest", "src1"]],
 
     # Negative ALU operations
 

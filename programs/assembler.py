@@ -35,11 +35,8 @@ class Assembler():
 
     # Formats each line into one continueous instruction of binary digits 
 
-    def format_line(self, line: str):
-        parts = line.split()
-
+    def format_line(self, parts: list):
         # Format the opcode into binary
-
         oc = parts[0]
         if oc not in self.opcodes:
             raise SyntaxError(oc + " is not a valid instruction")
@@ -65,16 +62,62 @@ class Assembler():
 
         return new_line
 
-    def assemble_psuedo(self, tokens):
-        pass
+    def assemble_psuedo(self, parts):
+        if parts[0] not in self.psuedos:
+            return [parts]
+
+        if parts[0] in self.psuedos:
+            oc = parts[0]
+            dest = ""
+            src1 = ""
+            src2 = ""
+
+            if len(parts) > 1:
+                dest = parts[1]
+            if len(parts) > 2:
+                src1 = parts[2]
+            if len(parts) > 3:
+                src2 = parts[3]
+
+            result = []
+
+            for inst in self.psuedos[oc]:
+                new_inst = []
+                new_inst.append(inst[0])
+
+                for part in inst:
+                    match part:
+                        case "dest":
+                             new_inst.append(dest)
+                        case "src1":
+                            new_inst.append(src1)
+                        case "src2":
+                            new_inst.append(src2)
+                        case _:
+                            if len(part) == 4:
+                                new_inst.append(part)
+                            elif part not in self.opcodes:
+                                raise SyntaxError(part + " is not a valid psudeo-instruction parameter.")
+                print("New inst")
+                print(new_inst)
+                result.append(new_inst)
+
+            return result
 
     # Formats each line in the entire program
 
     def format_program(self, prog):
-        formatted = []
+        # Formats the program into all real instructions
+        expanded = []
         for line in prog:
-            formatted.append(self.format_line(line))
-        print(formatted)
+            parts = line.split()
+            for inst in self.assemble_psuedo(parts):
+                expanded.append(inst)
+
+        # Formats every line into binary
+        formatted = []
+        for inst in expanded:
+            formatted.append(self.format_line(inst))
         return formatted
 
 

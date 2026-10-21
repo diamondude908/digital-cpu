@@ -13,7 +13,7 @@ version = "beta 1.1"
 print("Running: EthanOS, ver. " + version)
 print("Current Resoltion: " + str(display_width) + "x" + str(display_height))
 
-commands = ["exit", "run"]
+commands = ["exit", "run", "read"]
 
 def run_program(program):
     prog = "programs/" + program
@@ -38,6 +38,8 @@ while True:
                 break
             case "run":
                 run_program(arg)
+            case "read":
+                print(cpu.reg_file.read(arg))
 
     print("To exit, type in exit into the the text field.")
     

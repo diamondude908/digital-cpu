@@ -30,6 +30,7 @@ class CPU():
         self.reg_file.init(self.num_registers, bit_len)
         #self.display = display
         #self.display.init()
+
         # Initialize all program-related information
 
         self.cycles = 0
@@ -95,7 +96,7 @@ class CPU():
             case "ADD" | "SUB" | "AND" | "OR" | "XOR": 
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
             case "SFT": 
-                result, flags = self.alu.operate("SFT", dest, src1, src2)
+                result, flags = self.alu.operate("SFT", dest, src1, reg_b)
             case "MOV": 
                 "1000"
             case "LD":
@@ -112,15 +113,14 @@ class CPU():
             case "STR": 
                 self.memory.write(mem_dest, reg_b)
             case "JMP": 
-                cond = int(dest, 2)
                 conditions = {
-                    0: True,
-                    1: self.flags["Z"],
-                    2: not self.flags["Z"],
-                    3: self.flags["C"],
-                    4: not self.flags["C"]
+                    "0000": True,
+                    "0001": self.flags["Z"],
+                    "0010": not self.flags["Z"],
+                    "0011": self.flags["C"],
+                    "0100": not self.flags["C"]
                 }
-                if conditions[cond]:
+                if conditions[dest]:
                     self.pc.jump(int_dest)
             case "HLT": 
                 "1110"
