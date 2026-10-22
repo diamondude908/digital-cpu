@@ -11,7 +11,7 @@ import programs.isa as isa
 
 class CPU():
 
-    def __init__(self, bit_len, num_reg, mem_cells, display_width, display_height):
+    def __init__(self, bit_len, num_reg, cells_per_block, display_width, display_height):
         
         # Initialize bit information and registers
         
@@ -19,7 +19,7 @@ class CPU():
         self.field_len = bit_len // 2
         self.num_registers = num_reg
         self.memory = Memory
-        self.memory.init(bit_len, mem_cells, display_width, display_height)
+        self.memory.init(bit_len, cells_per_block, num_reg, display_width, display_height)
 
         # Initialize all components
 
@@ -91,8 +91,8 @@ class CPU():
         int_dest = self.utils.bits_to_int(src1)
 
         match opcode:
-            case "NOP":
-                pass
+            case "CBK":
+                self.memory.change_bank(dest)
             case "ADD" | "SUB" | "AND" | "OR" | "XOR" | "NOT": 
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
             case "SFT": 
