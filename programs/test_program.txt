@@ -8,7 +8,7 @@ SUB r1 r1 r3
 JZ 0010
 
 SHL r8 r8
-ADD r8 r8 r0
+ADI r8 0x0F
 
 
 

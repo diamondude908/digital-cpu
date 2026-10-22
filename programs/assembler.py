@@ -78,12 +78,11 @@ class Assembler():
                 src1 = parts[2]
             if len(parts) > 3:
                 src2 = parts[3]
-
+                
             result = []
 
             for inst in self.psuedos[oc]:
                 new_inst = []
-                new_inst.append(inst[0])
 
                 for part in inst:
                     match part:
@@ -94,9 +93,12 @@ class Assembler():
                         case "src2":
                             new_inst.append(src2)
                         case _:
+                            print(part)
                             if len(part) == 4:
                                 new_inst.append(part)
-                            elif part not in self.opcodes:
+                            elif part in self.opcodes or part in self.registers:
+                                new_inst.append(part)
+                            else:
                                 raise SyntaxError(part + " is not a valid psudeo-instruction parameter.")
                 print("New inst")
                 print(new_inst)

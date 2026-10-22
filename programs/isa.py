@@ -7,8 +7,8 @@ opcodes = {
    "OR": "0100",
    "XOR": "0101",
    "SFT": "0110",
-   "DIS": "0111",
-   "MOV": "1000",
+   "NOT": "0111",
+   "DIS": "1000",
    "LD": "1001",
    "LDI": "1010",
    "CMP": "1011",
@@ -26,8 +26,8 @@ bin_opcodes = {
     "0100": "OR",
     "0101": "XOR",
     "0110": "SFT",
-    "0111": "DIS",
-    "1000": "MOV",
+    "0111": "NOT",
+    "1000": "DIS",
     "1001": "LD",
     "1010": "LDI",
     "1100": "STR",
@@ -43,11 +43,22 @@ pseudos = {
     "JNZ": [["JMP", "0011", "dest"]],
     "JC": [["JMP", "0100", "dest"]],
     "JNC": [["JMP", "0101", "dest"]],
+
+    # ALU based operations
+
+    "MOV": [["ADD", "dest", "src1", "r0"]],
     "SHL": [["SFT", "0001", "dest", "src1"]],
     "SHR": [["SFT", "0010", "dest", "src1"]],
+    "ADI": [["LDI", "r15", "src1"], ["ADD", "dest", "dest", "r15"]],
 
     # Negative ALU operations
 
-    "NAND": [["AND", "dest", "src1", "src2"], ["NOT", "dest", "src1"]]
+    "NAND": [["AND", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
+    "NOR": [["OR", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
+    "XNOR": [["XOR", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
+
+    # Miscellaneous operations
+
+    "NOP": [["ADD", "r0", "r0", "r0"]]
 }
 

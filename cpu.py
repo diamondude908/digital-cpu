@@ -33,6 +33,7 @@ class CPU():
 
         # Initialize all program-related information
 
+        self.halted = False
         self.cycles = 0
         self.flags = {}
         self.program = []
@@ -42,7 +43,6 @@ class CPU():
 
         self.bin_opcodes = isa.bin_opcodes
 
-        
 
     # The function that executes all instructions from the program
 
@@ -93,12 +93,10 @@ class CPU():
         match opcode:
             case "NOP":
                 pass
-            case "ADD" | "SUB" | "AND" | "OR" | "XOR": 
+            case "ADD" | "SUB" | "AND" | "OR" | "XOR" | "NOT": 
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
             case "SFT": 
                 result, flags = self.alu.operate("SFT", dest, src1, reg_b)
-            case "MOV": 
-                "1000"
             case "LD":
                 mem_val = self.memory.read(src)
                 self.reg_file.operate("LDI", dest, mem_val)
@@ -123,8 +121,7 @@ class CPU():
                 if conditions[dest]:
                     self.pc.jump(int_dest)
             case "HLT": 
-                "1110"
-            
+                self.halted = True
             case _:
                 raise SyntaxError(opcode + " is not a real opcode.")
 
@@ -151,7 +148,7 @@ class CPU():
     # The function that runs the entire program
 
     def run(self):
-        while self.pc.counter < self.pc.prog_len:
+        while self.pc.counter < self.pc.prog_len and not self.halted:
             self.step()
         else:
             print("Program finished in " + str(self.cycles) + " cycles!")

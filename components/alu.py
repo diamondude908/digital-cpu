@@ -119,7 +119,7 @@ class ALU:
                 case "CMP":
                     _, flags = self.compare(src1, src2)
                 case "NOT":
-                    result = self.NOT(dest, src1)
+                    result = self.get_inverse(src1)
                 case _:
                     raise SyntaxError(operation + " is not a valid ALU operation.")
 
