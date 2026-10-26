@@ -1,11 +1,20 @@
 #Loads in the values
+MACRO load_stuff
 LDI r1 0x03
 LDI r2 0x01
-LDI r3 0x01
+ENDMACRO
 
+MACRO load_more_stuff
+LDI r3 0x01
+ENDMACRO
+
+load_stuff
+load_more_stuff
+
+jump:
 ADD r8 r8 r2
 SUB r1 r1 r3
-JZ 0010
+JZ
 
 SHL r8 r8
 ADI r8 0x0F

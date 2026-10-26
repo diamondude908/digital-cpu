@@ -1,31 +1,47 @@
 import pygame
 import components.memory as memory
 
-scale = 30
-on_color = (230, 230, 230)
-off_color = (20, 20, 20)
+class Display():
 
-width = 0
-height = 0
-screen = None
-clock = None
+    def __init__(self):
+        self.scale = 20
+        self.on_color = (230, 230, 230)
+        self.off_color = (20, 20, 20)
 
-def init():
-    global screen, clock
+        self.width = memory.display_width
+        self.height = memory.display_height
+        self.running = True
 
-    width = memory.display_width
-    height = memory.display_height
+        self.pixels = []
+        for y in range(self.height):
+            row = []
+            for x in range(self.width):
+                row.append(0)
+            self.pixels.append(row)
 
-    pygame.init()
-    screen = pygame.display.set_mode((width * scale, height * scale))
-    clock = pygame.time.Clock()
+    def run_window(self):
+        pygame.init()
+        self.window = pygame.display.set_mode((self.width * self.scale, self.height * self.scale))
+        clock = pygame.time.Clock()
 
-def draw_pixel(x, y, on):
-    if on:
-        color = on_color
-    else:
-        color = off_color
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
 
-    rect = pygame.Rect(x * scale, y * scale, scale, scale)
-    pygame.draw.rect(screen, color, rect)
-    pygame.display.flip()
+            for y in range(self.height):
+                for x in range(self.width):
+                    if self.pixels[y][x]:
+                        color = self.on_color
+                    else:
+                        color = self.off_color
+                    rect = pygame.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
+                    pygame.draw.rect(self.window, color, rect)
+
+            pygame.display.flip()
+            clock.tick(60)
+
+        pygame.quit()
+
+    def draw_pixel(self, x, y, on):
+        self.pixels[x][y] = on

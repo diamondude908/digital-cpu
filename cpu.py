@@ -4,7 +4,7 @@ import global_defs as utils
 import components.program_counter as Pc
 import components.register_file as RegFile
 from components.alu import ALU
-import components.display as display
+from components.display import Display
 import programs.isa as isa
 
 # CPU class
@@ -28,8 +28,8 @@ class CPU():
         self.alu = ALU(bit_len)
         self.reg_file = RegFile
         self.reg_file.init(self.num_registers, bit_len)
-        #self.display = display
-        #self.display.init()
+        self.display = Display()
+        self.display.draw_pixel(0, 0, 1)
 
         # Initialize all program-related information
 
@@ -38,6 +38,7 @@ class CPU():
         self.flags = {}
         self.program = []
         self.assembler = Assembler(bit_len, num_reg)
+        self.jump_num = 0
 
         # Initialize all opcodes from binary
 
@@ -88,7 +89,7 @@ class CPU():
         mem_dest = self.utils.binary(dest + src1)
 
         # This is only used in the JMP case
-        int_dest = self.utils.bits_to_int(src1)
+        int_dest = self.utils.bits_to_int(dest)
 
         match opcode:
             case "CBK":
@@ -97,6 +98,8 @@ class CPU():
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
             case "SFT": 
                 result, flags = self.alu.operate("SFT", dest, src1, reg_b)
+            case "DIS":
+                pass
             case "LD":
                 mem_val = self.memory.read(src)
                 self.reg_file.operate("LDI", dest, mem_val)
@@ -119,7 +122,9 @@ class CPU():
                     "0100": not self.flags["C"]
                 }
                 if conditions[dest]:
-                    self.pc.jump(int_dest)
+                    self.pc.jump(self.assembler.labels["jump" + str(self.jump_num)] - 1)
+                else:
+                    self.jump_num += 1
             case "HLT": 
                 self.halted = True
             case _:

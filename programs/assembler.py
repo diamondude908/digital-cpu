@@ -9,7 +9,10 @@ class Assembler():
         self.num_reg = num_reg
         self.program = []
 
+        self.jump_num = 0
+        self.labels = {}
         self.registers = {}
+        self.macros = {}
         for i in range(num_reg):
             self.registers["r" + str(i)] = format(i, "04b")
 
@@ -22,7 +25,7 @@ class Assembler():
     # turns it into a list of strings
 
     def read_file(self, file: str):
-        list_file = []
+        cleaned = []
         with open(file, "r") as f:
             for line in f:
                 line = line.strip()
@@ -30,7 +33,22 @@ class Assembler():
                     continue
                 if line[0] == "#":
                     continue
-                list_file.append(line)
+                
+                cleaned.append(line)
+
+        expanded = self.expand_macros(cleaned)
+
+        print(expanded)
+        list_file = []
+        for line in expanded:
+            if line.endswith(":"):
+                name = line[:-1]
+                self.labels[name + str(self.jump_num)] = len(list_file)
+                self.jump_num += 1
+                continue
+            list_file.append(line)
+
+        print(self.labels)
         return list_file
 
     # Formats each line into one continueous instruction of binary digits 
@@ -62,6 +80,52 @@ class Assembler():
 
         return new_line
 
+    def expand_macros(self, lines):
+        body_lines = []
+        i = 0
+        while i < len(lines):
+            parts = lines[i].split()
+
+            if parts[0] == "MACRO":
+                name = parts[1]
+                params = parts[2:]
+                macro_lines = []
+                i += 1
+                while lines[i] != "ENDMACRO":
+                    macro_lines.append(lines[i])
+                    i += 1
+                self.macros[name] = [params, macro_lines]
+            else:
+                body_lines.append(lines[i])
+
+            i += 1
+        result = []
+        for line in body_lines:
+            parts = line.split()
+
+            if parts[0] in self.macros:
+                current_macro = parts[0]
+                params = self.macros[current_macro][0]
+                macro_lines = self.macros[current_macro][1]
+                args = parts[1:]
+                if len(args) != len(params):
+                    raise SyntaxError("Macro " + current_macro + " expects " + len(params) + " arguements.") 
+
+                for macro_line in macro_lines:
+                    new_parts = []
+                    for part in macro_line.split():
+                        if part in params:
+                            new_parts.append(args[params.index(part)])
+                        else:
+                            new_parts.append(part)
+                    result.append(" ".join(new_parts))
+            else:
+                result.append(line)
+
+        print(self.macros)
+        return result
+
+        
     def assemble_psuedo(self, parts):
         if parts[0] not in self.psuedos:
             return [parts]
@@ -93,15 +157,12 @@ class Assembler():
                         case "src2":
                             new_inst.append(src2)
                         case _:
-                            print(part)
                             if len(part) == 4:
                                 new_inst.append(part)
                             elif part in self.opcodes or part in self.registers:
                                 new_inst.append(part)
                             else:
                                 raise SyntaxError(part + " is not a valid psudeo-instruction parameter.")
-                print("New inst")
-                print(new_inst)
                 result.append(new_inst)
 
             return result
