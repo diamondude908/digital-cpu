@@ -86,6 +86,7 @@ class CPU():
         reg_b = self.reg_file.read(src2)
 
         src = self.utils.binary(src1 + src2)
+        int_src = self.utils.bits_to_int(src1)
         mem_dest = self.utils.binary(dest + src1)
 
         # This is only used in the JMP case
@@ -122,10 +123,9 @@ class CPU():
                     "0100": not self.flags["C"]
                 }
                 if conditions[dest]:
-                    self.pc.jump(self.assembler.labels["jump" + str(self.jump_num)] - 1)
-                else:
-                    self.jump_num += 1
-            case "HLT": 
+                    address = int(src1 + src2, 2)
+                    self.pc.jump(address -1)
+            case "HLT":
                 self.halted = True
             case _:
                 raise SyntaxError(opcode + " is not a real opcode.")
@@ -155,6 +155,9 @@ class CPU():
     def run(self):
         while self.pc.counter < self.pc.prog_len and not self.halted:
             self.step()
+            if self.cycles > 200:
+                print("Program exceeded 200 cycles.")
+                break
         else:
             print("Program finished in " + str(self.cycles) + " cycles!")
             

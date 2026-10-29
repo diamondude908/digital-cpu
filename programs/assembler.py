@@ -9,7 +9,6 @@ class Assembler():
         self.num_reg = num_reg
         self.program = []
 
-        self.jump_num = 0
         self.labels = {}
         self.registers = {}
         self.macros = {}
@@ -38,18 +37,7 @@ class Assembler():
 
         expanded = self.expand_macros(cleaned)
 
-        print(expanded)
-        list_file = []
-        for line in expanded:
-            if line.endswith(":"):
-                name = line[:-1]
-                self.labels[name + str(self.jump_num)] = len(list_file)
-                self.jump_num += 1
-                continue
-            list_file.append(line)
-
-        print(self.labels)
-        return list_file
+        return expanded
 
     # Formats each line into one continueous instruction of binary digits 
 
@@ -79,6 +67,17 @@ class Assembler():
         new_line = new_line.ljust(self.inst_len, "0")
 
         return new_line
+
+    def resolve_labels(self, line, prog):
+        if line[0].endswith(":"):
+            name = line[0][:-1]
+            self.labels[name] = len(prog)
+            return
+        elif line[-1] in self.labels:
+            line[-1] = format(self.labels[line[-1]], "08b")
+            return line
+        else:
+            return line
 
     def expand_macros(self, lines):
         body_lines = []
@@ -122,11 +121,10 @@ class Assembler():
             else:
                 result.append(line)
 
-        print(self.macros)
         return result
 
         
-    def assemble_psuedo(self, parts):
+    def expand_psuedos(self, parts):
         if parts[0] not in self.psuedos:
             return [parts]
 
@@ -156,6 +154,8 @@ class Assembler():
                             new_inst.append(src1)
                         case "src2":
                             new_inst.append(src2)
+                        case "label":
+                            new_inst.append(parts[-1])
                         case _:
                             if len(part) == 4:
                                 new_inst.append(part)
@@ -171,15 +171,28 @@ class Assembler():
 
     def format_program(self, prog):
         # Formats the program into all real instructions
+        labels_resolved = []
         expanded = []
+
+        # Expands any pseudos that currently reside in the program
         for line in prog:
             parts = line.split()
-            for inst in self.assemble_psuedo(parts):
+            
+            for inst in self.expand_psuedos(parts):
                 expanded.append(inst)
+
+        # Resolves any labels that need to be dealt with
+        for line in expanded:
+            new_line = self.resolve_labels(line, labels_resolved)
+            if new_line:
+                labels_resolved.append(new_line)
+
+        print(self.labels)
+        print(labels_resolved)
 
         # Formats every line into binary
         formatted = []
-        for inst in expanded:
+        for inst in labels_resolved:
             formatted.append(self.format_line(inst))
         return formatted
 

@@ -39,23 +39,26 @@ bin_opcodes = {
 pseudos = {
     # Jump operations
 
-    "JZ": [["JMP", "0010", "dest"]],
-    "JNZ": [["JMP", "0011", "dest"]],
-    "JC": [["JMP", "0100", "dest"]],
-    "JNC": [["JMP", "0101", "dest"]],
+    "JZ": [["JMP", "0010", "label"]],
+    "JNZ": [["JMP", "0011", "label"]],
+    "JC": [["JMP", "0100", "label"]],
+    "JNC": [["JMP", "0101", "label"]],
 
     # ALU based operations
 
-    "MOV": [["ADD", "dest", "src1", "r0"]],
+    "MOVE": [["ADD", "dest", "src1", "r0"]],
     "SHL": [["SFT", "0001", "dest", "src1"]],
     "SHR": [["SFT", "0010", "dest", "src1"]],
-    "ADI": [["LDI", "r15", "src1"], ["ADD", "dest", "dest", "r15"]],
+    "ADDI": [["LDI", "r15", "src1"], ["ADD", "dest", "dest", "r15"]],
 
     # Negative ALU operations
 
     "NAND": [["AND", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
     "NOR": [["OR", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
     "XNOR": [["XOR", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
+
+    # Display operations
+    
 
     # Miscellaneous operations
 
