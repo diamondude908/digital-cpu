@@ -50,6 +50,8 @@ pseudos = {
     "SHL": [["SFT", "0001", "dest", "src1"]],
     "SHR": [["SFT", "0010", "dest", "src1"]],
     "ADDI": [["LDI", "r15", "src1"], ["ADD", "dest", "dest", "r15"]],
+    "INC": [["LDI", "r15", "0x01"], ["ADD", "dest", "dest", "r15"]],
+    "DEC": [["LDI", "r15", "0x01"], ["SUB", "dest", "dest", "r15"]],
 
     # Negative ALU operations
 
@@ -58,7 +60,10 @@ pseudos = {
     "XNOR": [["XOR", "dest", "src1", "src2"], ["NOT", "dest", "dest"]],
 
     # Display operations
-    
+
+    "DRAW": [["DIS", "0000", "dest", "src1"]],
+    "ERASE": [["DIS", "0001", "src1", "src2"]],
+    "CLRS": [["DIS", "0010", "r0", "r0"]],
 
     # Miscellaneous operations
 

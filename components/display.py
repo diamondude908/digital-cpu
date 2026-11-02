@@ -4,7 +4,7 @@ import components.memory as memory
 class Display():
 
     def __init__(self):
-        self.scale = 20
+        self.scale = 5
         self.on_color = (230, 230, 230)
         self.off_color = (20, 20, 20)
 
@@ -44,4 +44,17 @@ class Display():
         pygame.quit()
 
     def draw_pixel(self, x, y, on):
+        if x >= self.width or y >= self.height:
+            return
         self.pixels[x][y] = on
+
+    def clear(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                self.pixels[x][y] = 0
+
+    def change_color(self, color, on):
+        if on:
+            self.on_color = color
+        else:
+            self.off_color = color

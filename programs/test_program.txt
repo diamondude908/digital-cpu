@@ -1,20 +1,27 @@
-#Loads in the values
-MACRO load_stuff
+;Loads in the values
+
+.macro load_stuff
 LDI r1 0x03
-LDI r2 0x01
-LDI r3 0x01
-ENDMACRO
+LDI r4 0x00
+LDI r5 0x03
+.endmacro
 
-MACRO cycle
-ADD r8 r8 r2
-SUB r1 r1 r3
-ENDMACRO
+.macro cycle reg
+INC reg
+DEC r1
+.endmacro
 
+.equ LOOP 3
+
+CLRS
 load_stuff
 
-loop:
-cycle
-JZ loop
+main_loop:
+
+jump:
+cycle r8
+JZ jump
+
 
 
 

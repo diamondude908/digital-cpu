@@ -4,12 +4,12 @@ from cpu import CPU
 bit_len = 8
 num_reg = 16
 cells = 256
-display_width = 32
-display_height = 32
+display_width = 128
+display_height = 128
 
 cpu = CPU(bit_len, num_reg, cells, display_width, display_height)
 
-version = "beta 1.2"
+version = "beta 1.3"
 
 print("Running: EthanOS, ver. " + version)
 print("Current Resoltion: " + str(display_width) + "x" + str(display_height))
@@ -21,8 +21,6 @@ def run_program(program):
     cpu.assemble_program(prog)
     cpu.run()
 
-
-#cpu.display.draw_pixel(0, 0, 1)
 def shell_loop():
     while True:
         user_input = input(">>> ").lower()

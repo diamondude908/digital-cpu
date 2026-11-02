@@ -11,7 +11,7 @@ import programs.isa as isa
 
 class CPU():
 
-    def __init__(self, bit_len, num_reg, cells_per_block, display_width, display_height):
+    def __init__(self, bit_len, num_reg, cells_per_bank, display_width, display_height):
         
         # Initialize bit information and registers
         
@@ -19,7 +19,7 @@ class CPU():
         self.field_len = bit_len // 2
         self.num_registers = num_reg
         self.memory = Memory
-        self.memory.init(bit_len, cells_per_block, num_reg, display_width, display_height)
+        self.memory.init(bit_len, cells_per_bank, num_reg, display_width, display_height)
 
         # Initialize all components
 
@@ -84,9 +84,10 @@ class CPU():
 
         reg_a = self.reg_file.read(src1)
         reg_b = self.reg_file.read(src2)
+        int_reg_a = self.utils.bits_to_int(reg_a)
+        int_reg_b = self.utils.bits_to_int(reg_b)
 
         src = self.utils.binary(src1 + src2)
-        int_src = self.utils.bits_to_int(src1)
         mem_dest = self.utils.binary(dest + src1)
 
         # This is only used in the JMP case
@@ -95,38 +96,52 @@ class CPU():
         match opcode:
             case "CBK":
                 self.memory.change_bank(dest)
+
             case "ADD" | "SUB" | "AND" | "OR" | "XOR" | "NOT": 
                 result, flags = self.alu.operate(opcode, dest, reg_a, reg_b)
+
             case "SFT": 
                 result, flags = self.alu.operate("SFT", dest, src1, reg_b)
+
             case "DIS":
-                pass
+
+                match dest:
+                    case "0000":
+                        self.display.draw_pixel(int_reg_b, int_reg_a, 1)
+                    case "0001": 
+                        self.display.draw_pixel(int_reg_b, int_reg_a, 0)
+                    case "0010": 
+                        self.display.clear()
+            
             case "LD":
                 mem_val = self.memory.read(src)
                 self.reg_file.operate("LDI", dest, mem_val)
                 print("Loaded: " + self.utils.display_bin(mem_val))
+
             case "LDI": 
                 result = self.reg_file.operate("LDI", dest, src)
+
             case "CMP":
-                # This one is in a weird order because comp only takes 
-                # two arguments, so it takes the "write" address as the
-                # zero register and uses the other two positions as normal
-                _, flags = self.alu.operate("COMP", src2, dest, src1)
+                _, flags = self.alu.operate("CMP", dest, reg_a, reg_b)
+
             case "STR": 
                 self.memory.write(mem_dest, reg_b)
+
             case "JMP": 
-                conditions = {
+                jump_conditions = {
                     "0000": True,
                     "0001": self.flags["Z"],
                     "0010": not self.flags["Z"],
                     "0011": self.flags["C"],
                     "0100": not self.flags["C"]
                 }
-                if conditions[dest]:
+                if jump_conditions[dest]:
                     address = int(src1 + src2, 2)
                     self.pc.jump(address -1)
+
             case "HLT":
                 self.halted = True
+
             case _:
                 raise SyntaxError(opcode + " is not a real opcode.")
 

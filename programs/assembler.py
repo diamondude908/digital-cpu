@@ -9,11 +9,14 @@ class Assembler():
         self.num_reg = num_reg
         self.program = []
 
+        self.constants = {}
         self.labels = {}
         self.registers = {}
         self.macros = {}
         for i in range(num_reg):
             self.registers["r" + str(i)] = format(i, "04b")
+
+        functions = ["macro"]
 
         # Initialize the ISA lists
 
@@ -30,7 +33,7 @@ class Assembler():
                 line = line.strip()
                 if not line:
                     continue
-                if line[0] == "#":
+                if line[0] == ";":
                     continue
                 
                 cleaned.append(line)
@@ -61,6 +64,8 @@ class Assembler():
                     raise SyntaxError(value + " is not valid 8 bit number.")
                 parts[i] = format(value, "08b")
 
+
+
         # Puts everything together
 
         new_line = "".join(parts)
@@ -68,14 +73,24 @@ class Assembler():
 
         return new_line
 
-    def resolve_labels(self, line, prog):
-        if line[0].endswith(":"):
+    def resolve_operands(self, word, line, prog):
+        if word.endswith(":"):
             name = line[0][:-1]
             self.labels[name] = len(prog)
             return
-        elif line[-1] in self.labels:
+
+        elif word == ".equ":
+            name = line[1]
+            value = line[2]
+            self.constants[name] = value
+        
+        elif line[-1] in self.labels or line[-1] in self.constants:
             line[-1] = format(self.labels[line[-1]], "08b")
             return line
+
+        elif word == ".byte":
+            for value in line[1:]:
+                pass
         else:
             return line
 
@@ -85,12 +100,12 @@ class Assembler():
         while i < len(lines):
             parts = lines[i].split()
 
-            if parts[0] == "MACRO":
+            if parts[0] == ".macro":
                 name = parts[1]
                 params = parts[2:]
                 macro_lines = []
                 i += 1
-                while lines[i] != "ENDMACRO":
+                while lines[i] != ".endmacro":
                     macro_lines.append(lines[i])
                     i += 1
                 self.macros[name] = [params, macro_lines]
@@ -183,11 +198,13 @@ class Assembler():
 
         # Resolves any labels that need to be dealt with
         for line in expanded:
-            new_line = self.resolve_labels(line, labels_resolved)
+            word = line[0]
+            
+            new_line = self.resolve_operands(word, line, labels_resolved)
             if new_line:
                 labels_resolved.append(new_line)
 
-        print(self.labels)
+        print(self.constants)
         print(labels_resolved)
 
         # Formats every line into binary
